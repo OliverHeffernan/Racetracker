@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>RaceTracker</title>
+</head>
+<body>
+    <nav>
+        <!-- navbar -->
+        <header className="">
+            <div class="inactive"><a>RaceTracker</a></div>
+            <div class="active">App</div>
+            <div class="inactive">Help</div>
+            <div class="inactive">Settings</div>
+            <div class="inactive right" id="rDetailsButtonHidden" onclick="hamburger()">Runner Details</div>
+        </header>
+
+        <!-- desktop controls -->
+        <div id="controls" class="controls-hidden">
+            <div class="timeCont">
+                00:00
+            </div>
+            <button class="addCont" onclick="addTime()"><nobr><i class="fa-solid fa-user-clock"></i>Record Runner Time</nobr></button>
+            <div id="runningNo">
+                <nobr><i class="fa-solid fa-person-running"></i>Runners Left: <em id="runnersRunning">0</em></nobr>
+            </div>
+            <button onclick="start()" class="beginCont"><nobr><i class="fa-solid fa-play"></i>Start Race</nobr></button>
+            <button onclick="checkEnd()" class="endCont"><nobr><i class="fa-solid fa-stop"></i>Stop Race</nobr></button>
+            <button onclick="exportResults()" class="exportCont"><nobr><i class="fa-solid fa-file-export"></i>Save Results</nobr></button>
+        </div>
+    </nav>
+
+    <!-- add a gap so that nothing is hidden behind the nav elements -->
+    <div id="gap"></div>
+
+    <!-- Main app screen -->
+    <div id="app">
+        <section id="main" class="sectionAsideClosed">
+            <div id="mobileControls">
+                <button class="addCont" onclick="addTime()"><i class="fa-solid fa-user-clock"></i></button>
+                <button class="beginCont" onclick="start()"><i class="fa-solid fa-play"></i></button>
+                <button class="endCont" onclick="end()"><i class="fa-solid fa-stop"></i></button>
+                <button class="exportCont" onclick="exportResults()"><i class="fa-solid fa-file-export"></i></button>
+                <div class="timeCont">00:00</div>
+            </div>
+            <div id="margins">
+                <div class="scrollX" id="resultsContainer">
+                    <table id="results" class="centeredTable" cellspacing="0">
+                        <tbody id="raceInfoDisp">
+                            <tr>
+                                <td colspan="10"><h1 id="raceName"></h1></td>
+                            </tr>
+                            <tr>
+                                <td colspan="10"><p id="raceInfo"></p></td>
+                            </tr>
+                        </tbody>
+                        <tbody id="rBody">
+                            <tr id="tableHead">
+                                <th>#</th>
+                                <th id="nameHead">Name</th>
+                                <th>School/Club</th>
+                                <th id="numberHead">Bib No.</th>
+                                <th id="genderHead">Gender</th>
+                                <th>Age</th>
+                                <th>Time</th>
+                                <th id="pace">Min/km</th>
+                                <th id="timeDiffHead">Time Diff.</th>
+                            </tr>
+                            <tr class="resultRow">
+                                <td class="placing"><em class="placingNumber">1</em></td>
+                                <td class="nameRes"></td>
+                                <td class="schoolRes"></td>
+                                <td class="raceNoRes"><input id="number" type="text" name="number"></td>
+                                <td class="genderRes"></td>
+                                <td class="ageRes"></td>
+                                <td class="timeRes"></td>
+                                <td class="paceRes"></td>
+                                <td class="timeDiffRes"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="exportContainer">
+                    <table id="exportTable" class="centeredTable" cellpadding="0" cellspacing="0" border="0"></table>
+                </div>
+            </div>
+        </section>
+        <aside id="sideBar" class="asideClosed">
+            <table id="hamburgerButtons">
+                <tr onclick="hamburger()" class="clickable">
+                    <td><i id="asideArrow" class="fa-solid fa-arrow-left"></i></td>
+                    <td>Minimize</td>
+                </tr>
+                <tr onclick="openEntryForm()" class="clickable">
+                    <td><i class="fa-solid fa-user-pen"></i></td>
+                    <td>Add/Edit Participant</td>
+                </tr>
+            </table>
+            <!--<button id="hamburger" onclick="hamburger()"><i class="fa-solid fa-bars"></i>Close</button>
+            <button id="entryButton" onclick="openEntryForm()"><nobr><i class="fa-solid fa-user-pen"></i>Add/Edit Participant</nobr></button>-->
+            <div class="scrollX">
+                <table id="yetToFinish">
+                    <tbody id="yetToFinishBody">
+                        <tr id="tableHead">
+                            <th id="numberHead">Bib No.</th>
+                            <th>Name</th>
+                            <th>School/Club</th>
+                            <th>Gender</th>
+                            <th>Age</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </aside>
+    </div>
+    <!-- End race warning message -->
+    <div id="endWarningMessage" class="hidden">
+        <p>Not all registered runners have finished. Are you sure you want to end the race?</p>
+        <div class="options">
+            <button onclick="end()">Yes</button>
+            <button onclick="hideBox('endWarningMessage')">No</button>
+        </div>
+    </div>
+    <!-- Set Up screen -->
+    <div id="setUp">
+        <table id="formTable" class="centeredTable">
+            <tr>
+                <td colspan="2"><h1>Race details</h1></td>
+            </tr>
+            <tr>
+                <td>Race Name*:</td>
+                <td><input id="raceNameInput" type="text" maxlength="75"></td>
+            </tr>
+            <tr>
+                <td>Distance*:</td>
+                <td>
+                    <nobr>
+                        <input id="distanceInput" type="number">
+                        <select id="unitSelect">
+                            <option value="0.001">Meters (m)</option>
+                            <option value="1">Kilometers (km)</option>
+                            <option value="mi">Miles (mi)</option>
+                        </select>
+                    </nobr>
+                </td>
+            </tr>
+            <tr>
+                <td>Venue*:</td>
+                <td><input id="venueInput" type="text"></td>
+            </tr>
+            <tr>
+                <td>Surface Type*:</td>
+                <td>
+                    <select id="surfaceSelect">
+                        <option value="track">Track</option>
+                        <option value="road">Road</option>
+                        <option value="trail">Trail</option>
+                        <option value="xcountry">Cross Country</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><button id="submitButton" onclick="submitDetails()">Submit</button></td>
+            </tr>
+            <tr>
+                <td colspan="2" id="setUpErrorMessage" class="errorMessage"></td>
+            </tr>
+        </table>
+    </div>
+    <!-- Participant form -->
+    <div class="scrollY" id="participantFormContainer">
+        <div id="participantForm">
+            <button id="close" class="right" onclick="closeEntryForm()"><i class="fa-solid fa-xmark"></i></button>
+            <h1><nobr>Participant Form</nobr></h1>
+            <table>
+                <tr>
+                    <td>First Name*:</td>
+                    <td><input class="partInput" id="firstName" type="text"></td>
+                </tr>
+                <tr>
+                    <td>Last Name*:</td>
+                    <td><input class="partInput" id="lastName" type="text"></td>
+                </tr>
+                <tr>
+                    <td>Age*:</td>
+                    <td><input class="partInput" id="age" type="number" oninput="this.value|=0"></td>
+                </tr>
+                <tr>
+                    <td>Gender*:</td>
+                    <td>
+                        <select name="gender" id="genderSelect">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>School/Club:</td>
+                    <td><input class="partInput" id="school" type="text"></td>
+                </tr>
+                <tr>
+                    <td>Bib Number:</td>
+                    <td><input class="partInput" type="text" id="bibNumber" placeholder="0000" oninput="this.value|=0"><button id="submitButton" onclick="randomBibNumber()">Random Number</button></td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="entryErrorMessage" class="errorMessage"></td>
+                </tr>
+                
+            </table>   
+            <button id="submitButton" onclick="racerEntry(false)">Enter another Runner</button>
+            <button id="submitButton" onclick="racerEntry(true)">Submit and Close</button>
+        </div>
+    </div>
+
+    <!-- Edit Time window -->
+    <div class="scrollY" id="editTimeFormContainer">
+        <div id="editTimeForm">
+            <button id="close" class="right" onclick="closeEditForm()"><i class="fa-solid fa-xmark"></i></button>
+            <h1>Editing <em id="placingEdited"></em></h1>
+            <table>
+                <tr id="editTimeHead">
+                    <td>Hours</td>
+                    <td>Minutes</td>
+                    <td>Seconds</td>
+                </tr>
+                <tr>
+                    <td><input type="number" id="hours" placeholder="hours" oninput="this.value|=0"></td>
+                    <td><input type="number" id="minutes" placeholder="min" oninput="this.value|=0"></td>
+                    <td><input type="number" id="seconds" placeholder="sec"></td>
+                </tr>
+            </table>
+            <p class="errorMessage" id="editError"></p>
+            <button id="submitButton" onclick="saveEditTime()">Save</button>
+        </div>
+    </div>
+    <!-- edit participant form -->
+    <div class="scrollY" id="editParticipantFormContainer">
+        <div id="editParticipantForm">
+            <button id="close" class="right" onclick="closeEntryForm()"><i class="fa-solid fa-xmark"></i></button>
+            <h1><nobr>Participant Edit Form</nobr></h1>
+            <p id="editNumber">Editing: </p>
+            <table>
+                <tr>
+                    <td>First Name*:</td>
+                    <td><input id="editFirstName" type="text"></td>
+                </tr>
+                <tr>
+                    <td>Last Name*:</td>
+                    <td><input id="editLastName" type="text"></td>
+                </tr>
+                <tr>
+                    <td>Age*:</td>
+                    <td><input id="editAge" type="number" oninput="this.value|=0"></td>
+                </tr>
+                <tr>
+                    <td>Gender*:</td>
+                    <td>
+                        <select name="gender" id="editGenderSelect">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>School/Club:</td>
+                    <td><input id="editSchool" type="text"></td>
+                </tr>
+                <tr>
+                    <td>
+                        
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" id="entryErrorMessage" class="errorMessage"></td>
+                </tr>
+                
+            </table>
+            <button id="submitButton" onclick="saveParticipantDetails()">Save</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
