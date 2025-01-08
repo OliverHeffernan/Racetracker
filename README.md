@@ -1,4 +1,5 @@
 <h1>How to use the app</h1>
+You can access the app through this <a href="https://oliverheffernan.github.io/Racetracker/">link</a>
 <ol>
   <li>
     <h3>Enter the details of the race</h3>
